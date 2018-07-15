@@ -1,11 +1,11 @@
-(in-package :mygame)
+(in-package :jumpguy)
 
 (defun game-menu ()
   (setf (clear-color *engine-manager*) *black*)
   (let ((menu (create-menu (menu :active-input-device *all-input-id*)
                 (game-name *engine-manager*)
                 ("Play" (run-action
-                         (change-scene *engine-manager* (launch-mygame))))
+                         (change-scene *engine-manager* (launch-jumpguy))))
                 ("Quit" (run-action (quit))))))
     menu))
 
@@ -81,17 +81,17 @@
 (defmethod update :before ((scene myscene) delta-t-ms world-context)
   (update (slot-value scene 'scene-input-handler) delta-t-ms scene))
 
-(defun launch-mygame ()
+(defun launch-jumpguy ()
   (let* ((demo-width 1024)
          (demo-height 768)
          (world (make-instance 'myscene
                                :drag-y 0.99
                                :width demo-width :height demo-height
-                               ;; :background (make-instance 'static-sprite
-                               ;;                            :path-to-image (resource-path "background.png")
-                               ;;                            :width demo-width
-                               ;;                            :height demo-height)
-                               ;; :music (resource-path "mysong.wav")
+                               :background (make-instance 'static-sprite
+                                                          :path-to-image (resource-path "art/backgrounds/mountains_and_hills.png")
+                                                          :width demo-width
+                                                          :height demo-height)
+                               :music (resource-path "music/james_song27_riff_with_layers.ogg")
                                :camera (make-instance 'camera
                                                       :pixels-per-unit 1
                                                       :zoom 1
@@ -137,17 +137,6 @@
     world))
 
 #+nil
-(recurse.vert:main #'mygame::game-menu
-                   :game-name "mygame"
-                   :block T)
-
-;; TODO figure out screen size control
-#+nil
-(recurse.vert:main #'mygame::game-menu
-                   :game-name "mygame"
-                   :screen-sizer (lambda (max-width-px max-height-px fullscreen-p)
-                                   T ; full-screen
-                                   16x9 ; aspect-ratio
-                                   (values 100 100) ; Force size
-                                   )
+(recurse.vert:main #'jumpguy::game-menu
+                   :game-name "JumpGuy"
                    :block T)

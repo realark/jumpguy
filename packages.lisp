@@ -1,7 +1,4 @@
 (in-package :cl-user)
 
-(defpackage :mygame
+(defpackage :jumpguy
   (:use :cl :recurse.vert))
-
-(defpackage :mygame-test
-  (:use :prove :cl :mygame))
