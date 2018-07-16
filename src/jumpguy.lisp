@@ -25,7 +25,7 @@
   (setf (recurse.vert::color-mod rectangle) value))
 
 
-(defclass player (rectangle kinematic-object agent input-handler)
+(defclass player (jumper rectangle input-handler)
   ()
   (:documentation "Player-controlled rectangle."))
 
@@ -39,26 +39,19 @@
                  (:scancode-l :move-right)
                  (:scancode-left :move-left)
                  (:scancode-h :move-left)
-                 (:scancode-up :move-up)
-                 (:scancode-k :move-up)
-                 (:scancode-down :move-down)
-                 (:scancode-j :move-down)))
+                 (:scancode-space :jump)))
 
 (let* ((move-delta 3000)
        (right-vec  (make-acceleration-vector-seconds :x move-delta))
-       (left-vec   (make-acceleration-vector-seconds :x (- move-delta)))
-       (up-vec     (make-acceleration-vector-seconds :y (- move-delta)))
-       (down-vec   (make-acceleration-vector-seconds :y move-delta)))
+       (left-vec   (make-acceleration-vector-seconds :x (- move-delta))))
   (set-default-command-action-map
    player
+   (:jump (while-active
+           (jump player)))
    (:move-right (while-active
                  (apply-vector player right-vec)))
    (:move-left (while-active
-                (apply-vector player left-vec)))
-   (:move-up (while-active
-              (apply-vector player up-vec)))
-   (:move-down (while-active
-                (apply-vector player down-vec)))))
+                (apply-vector player left-vec)))))
 
 (defclass my-scene-input-handler (input-handler)
   ())
@@ -71,7 +64,7 @@
  my-scene-input-handler
  (:quit              (on-deactivate (quit))))
 
-(defclass myscene (game-scene physics-context-2d)
+(defclass myscene (platformer-game-scene)
   ((scene-input-handler
     :documentation "Input handler for the main scene."
     :initform (make-instance 'my-scene-input-handler
@@ -85,7 +78,6 @@
   (let* ((demo-width 1024)
          (demo-height 768)
          (world (make-instance 'myscene
-                               :drag-y 0.99
                                :width demo-width :height demo-height
                                :background (make-instance 'static-sprite
                                                           :path-to-image (resource-path "art/backgrounds/mountains_and_hills.png")
@@ -131,8 +123,7 @@
           *green*)
     (loop for game-object in objects do
          (add-to-scene world game-object))
-    ;; Uncomment to have camera target player
-    ;; (setf (target (camera world)) player)
+    (setf (target (camera world)) player)
     (setf (active-input-device player) -1)
     world))
 
