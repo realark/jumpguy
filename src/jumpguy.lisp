@@ -25,9 +25,37 @@
   (setf (recurse.vert::color-mod rectangle) value))
 
 
-(defclass player (jumper rectangle input-handler)
-  ()
-  (:documentation "Player-controlled rectangle."))
+(defclass player (jumper animated-sprite input-handler)
+  ((recurse.vert:path-to-image :initform (resource-path "others_artsets/jungle_asset_pack/Character/sprites/idle_sprite.png")
+                               :reader path-to-image)
+   ;; 21w-33h 154w-33h
+   (recurse.vert:animations  ;; TODO: class allocate? :allocation :class
+    :initform (list :running (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/run_sprite.png")
+                                             :frames (vector (make-sprite-source #.(* 0 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 1 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 2 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 3 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 4 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 5 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 6 21) #.(* 0 33) 21 33)
+                                                             (make-sprite-source #.(* 7 21) #.(* 0 33) 21 33))
+                                             :time-between-frames-ms 50)
+                    :standing (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/idle_sprite.png")
+                                              :frames (vector (make-sprite-source #.(* 0 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 1 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 2 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 3 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 4 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 5 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 6 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 7 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 8 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 9 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 10 19) #.(* 0 34) 19 34)
+                                                              (make-sprite-source #.(* 11 19) #.(* 0 34) 19 34))
+                                              :time-between-frames-ms 150)))
+   )
+  (:documentation "Human controlled entity."))
 
 (set-default-input-command-map
  player
@@ -52,6 +80,11 @@
                  (apply-vector player right-vec)))
    (:move-left (while-active
                 (apply-vector player left-vec)))))
+
+(defmethod get-new-animation ((player player))
+  (cond
+    ((> (abs (velocity-x player)) 0.05) :running)
+    (T :standing)))
 
 (defclass my-scene-input-handler (input-handler)
   ())
@@ -95,8 +128,8 @@
          (player (make-instance 'player
                                 :x 50
                                 :y (/ demo-height 2)
-                                :width 25
-                                :height 25))
+                                :width 42
+                                :height 66))
          (objects (list player
                         ;; put an invisible box around the boundary
                         (make-instance 'aabb
@@ -130,4 +163,4 @@
 #+nil
 (recurse.vert:main #'jumpguy::game-menu
                    :game-name "JumpGuy"
-                   :block T)
+                   :block nil)
