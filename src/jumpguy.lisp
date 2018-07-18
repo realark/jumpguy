@@ -91,11 +91,20 @@
 
 (set-default-input-command-map
  my-scene-input-handler
- ("sdl-keyboard" (:scancode-q :quit)))
+ ("sdl-keyboard" (:scancode-q :quit)
+                 (:scancode-r :reload)))
 
 (set-default-command-action-map
  my-scene-input-handler
- (:quit              (on-deactivate (quit))))
+ (:quit              (on-deactivate (quit)))
+ (:reload            (on-deactivate
+                      (let ((x (x *player*))
+                            (y (y *player*))
+                            (z (z *player*)))
+                        (change-scene *engine-manager* (launch-jumpguy))
+                        (setf (x *player*) x
+                              (y *player*) y
+                              (z *player*) z)))))
 
 (defclass myscene (platformer-game-scene)
   ((scene-input-handler
@@ -106,6 +115,8 @@
 
 (defmethod update :before ((scene myscene) delta-t-ms world-context)
   (update (slot-value scene 'scene-input-handler) delta-t-ms scene))
+
+(defparameter *player* nil)
 
 (defun launch-jumpguy ()
   (let* ((demo-width 1024)
@@ -158,6 +169,7 @@
          (add-to-scene world game-object))
     (setf (target (camera world)) player)
     (setf (active-input-device player) -1)
+    (setf *player* player)
     world))
 
 #+nil
