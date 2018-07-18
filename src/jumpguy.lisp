@@ -40,6 +40,12 @@
                                                              (make-sprite-source #.(* 6 21) #.(* 0 33) 21 33)
                                                              (make-sprite-source #.(* 7 21) #.(* 0 33) 21 33))
                                              :time-between-frames-ms 50)
+                    :jumping (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/jump.png")
+                                             :frames (vector (make-sprite-source #.(* 0 17) #.(* 0 34) 17 34))
+                                             :time-between-frames-ms 50)
+                    :falling (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/landing.png")
+                                             :frames (vector (make-sprite-source #.(* 0 20) #.(* 0 35) 20 35))
+                                             :time-between-frames-ms 50)
                     :standing (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/idle_sprite.png")
                                               :frames (vector (make-sprite-source #.(* 0 19) #.(* 0 34) 19 34)
                                                               (make-sprite-source #.(* 1 19) #.(* 0 34) 19 34)
@@ -83,6 +89,10 @@
 
 (defmethod get-new-animation ((player player))
   (cond
+    ((not (is-touching-ground player))
+     (if (< (velocity-y player) 0)
+         :jumping
+         :falling))
     ((> (abs (velocity-x player)) 0.05) :running)
     (T :standing)))
 
