@@ -139,7 +139,8 @@
          (world (make-instance 'myscene
                                :width demo-width :height demo-height
                                :background (make-instance 'static-sprite
-                                                          :path-to-image (resource-path "art/backgrounds/mountains_and_hills.png")
+                                                          ;; TODO: make parallax background
+                                                          :path-to-image (resource-path "others_artsets/jungle_asset_pack/parallax background/staticbg.png")
                                                           :width demo-width
                                                           :height demo-height)
                                :music (resource-path "music/james_song27_riff_with_layers.ogg")
@@ -150,7 +151,6 @@
                                                       :max-x demo-width
                                                       :max-y demo-height
                                                       :target-max-offset 20)))
-
          (player (make-instance 'player
                                 :x 50
                                 :y (/ demo-height 2)
