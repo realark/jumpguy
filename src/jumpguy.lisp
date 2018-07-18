@@ -25,11 +25,10 @@
   (setf (recurse.vert::color-mod rectangle) value))
 
 
-(defclass player (jumper animated-sprite input-handler)
+(defclass player (jumper animated-sprite input-handler direction-tracker)
   ((recurse.vert:path-to-image :initform (resource-path "others_artsets/jungle_asset_pack/Character/sprites/idle_sprite.png")
                                :reader path-to-image)
-   ;; 21w-33h 154w-33h
-   (recurse.vert:animations  ;; TODO: class allocate? :allocation :class
+   (recurse.vert:animations ; TODO: class allocate? :allocation :class
     :initform (list :running (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/run_sprite.png")
                                              :frames (vector (make-sprite-source #.(* 0 21) #.(* 0 33) 21 33)
                                                              (make-sprite-source #.(* 1 21) #.(* 0 33) 21 33)
@@ -83,8 +82,14 @@
    (:jump (while-active
            (jump player)))
    (:move-right (while-active
+                 (when (find :west (facing player))
+                   (flip player :horizontal))
+                 (push-direction player :east)
                  (apply-vector player right-vec)))
    (:move-left (while-active
+                (when (find :east (facing player))
+                  (flip player :horizontal))
+                (push-direction player :west)
                 (apply-vector player left-vec)))))
 
 (defmethod get-new-animation ((player player))
