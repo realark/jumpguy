@@ -96,7 +96,40 @@
              (setf (color rectangle) (color rectangle)))
 
   (defmethod (setf color) :after (value (rectangle rectangle))
-             (setf (recurse.vert::color-mod rectangle) value)))
+             (setf (recurse.vert::color-mod rectangle) value))
+
+  (let ((tile-types '(:middle-leaf)))
+    (defun make-tiles (&key (x (error ":x required"))
+                         (y (error ":y required"))
+                         (num-rows 1)
+                         (num-cols nil)
+                         (tiles (error ":tiles required")))
+      "Create a list of tiles beginning at the given x-y coords"
+      (cond ((and (numberp num-rows) (numberp num-cols))
+             (unless (= (* num-rows num-cols) (length tiles))
+               (error ":num-rows*:num-cols must equal the number of tiles passed in.")))
+            ((or (numberp num-rows) (numberp num-cols))
+             (unless (numberp num-rows) (setf num-rows (length tiles)))
+             (unless (numberp num-cols) (setf num-cols (length tiles))))
+            (T (error ":num-rows or :num-cols must be a number")))
+      (let ((tile-size 50))
+        (loop :with row = 0
+           :and col = 0
+           :and tile-objects = (list)
+           :for tile :in tiles :do
+           (unless (find tile tile-types)
+             (error (format nil "Unknown tile-type ~A. Must be one of ~A" tile tile-types)))
+           (push (make-instance 'rectangle
+                                :width tile-size :height tile-size
+                                :color (make-random-color)
+                                :x (+ x (* col tile-size))
+                                :y (+ y (* row tile-size)))
+                 tile-objects)
+           (incf col 1)
+           (when (= col num-cols)
+             (setf col 0
+                   row (+ 1 row)))
+           :finally (return tile-objects))))))
 
 (progn ; game scene
   (defclass my-scene-input-handler (input-handler)
@@ -131,7 +164,7 @@
              (update (slot-value scene 'scene-input-handler) delta-t-ms scene)))
 
 (progn ; main
-  (defparameter *player* nil)
+  (defvar *player* nil)
 
   (defun launch-jumpguy ()
     (let* ((demo-width #.(* 10 1024))
@@ -161,7 +194,13 @@
                                   :width 42
                                   :height 66))
            (objects (list player
-                          ;; put an invisible box around the boundary
+                          (make-tiles :x 300 :y (- demo-height 100)
+                                      :tiles '(:middle-leaf
+                                               :middle-leaf
+                                               :middle-leaf
+                                               :middle-leaf
+                                               :middle-leaf))
+                          ;; put an invisible box around world boundary
                           (make-instance 'aabb
                                          :x 0
                                          :y 0
@@ -184,8 +223,13 @@
                                          :width demo-width))))
       (setf (clear-color *engine-manager*)
             *green*)
-      (loop for game-object in objects do
-           (add-to-scene world game-object))
+      (labels ((add-obj (object)
+                 (if (listp object)
+                     (loop :for sub-object :in object :do
+                        (add-obj sub-object))
+                     (add-to-scene world object))))
+        (loop for object in objects do
+             (add-obj object)))
       (setf (target (camera world)) player)
       (setf (active-input-device player) -1)
       (setf *player* player)
