@@ -26,9 +26,7 @@
 
 
 (defclass player (jumper animated-sprite input-handler direction-tracker)
-  ((recurse.vert:path-to-image :initform (resource-path "others_artsets/jungle_asset_pack/Character/sprites/idle_sprite.png")
-                               :reader path-to-image)
-   (recurse.vert:animations ; TODO: class allocate? :allocation :class
+  ((recurse.vert:animations ; TODO: class allocate? :allocation :class
     :initform (list :running (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/Character/sprites/run_sprite.png")
                                              :frames (vector (make-sprite-source #.(* 0 21) #.(* 0 33) 21 33)
                                                              (make-sprite-source #.(* 1 21) #.(* 0 33) 21 33)
@@ -58,8 +56,7 @@
                                                               (make-sprite-source #.(* 9 19) #.(* 0 34) 19 34)
                                                               (make-sprite-source #.(* 10 19) #.(* 0 34) 19 34)
                                                               (make-sprite-source #.(* 11 19) #.(* 0 34) 19 34))
-                                              :time-between-frames-ms 150)))
-   )
+                                              :time-between-frames-ms 150))))
   (:documentation "Human controlled entity."))
 
 (set-default-input-command-map
@@ -119,7 +116,8 @@
                         (change-scene *engine-manager* (launch-jumpguy))
                         (setf (x *player*) x
                               (y *player*) y
-                              (z *player*) z)))))
+                              (z *player*) z)
+                        (sb-ext:gc :full T)))))
 
 (defclass myscene (platformer-game-scene)
   ((scene-input-handler
@@ -134,14 +132,18 @@
 (defparameter *player* nil)
 
 (defun launch-jumpguy ()
-  (let* ((demo-width 1024)
+  (let* ((demo-width #.(* 10 1024))
          (demo-height 768)
          (world (make-instance 'myscene
                                :width demo-width :height demo-height
-                               :background (make-instance 'static-sprite
-                                                          ;; TODO: make parallax background
-                                                          :path-to-image (resource-path "others_artsets/jungle_asset_pack/parallax background/staticbg.png")
+                               :background (make-instance 'scene-background
+                                                          :layers (list (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-1.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                        (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-2.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                        (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-3.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                        (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-4.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                        (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-5.png") :parallax-x 0.5 :parallax-y 0.01)
                                                           :width demo-width
+                                                          :wrap-width 1024
                                                           :height demo-height)
                                :music (resource-path "music/james_song27_riff_with_layers.ogg")
                                :camera (make-instance 'camera
