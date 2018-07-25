@@ -98,7 +98,10 @@
   (defmethod (setf color) :after (value (rectangle rectangle))
              (setf (recurse.vert::color-mod rectangle) value))
 
-  (let ((tile-types '(:middle-leaf)))
+  (let ((tile-types '(:middle-leaf
+                      :nw-leaf
+                      :ne-leaf
+                      :random-color-square)))
     (defun make-tiles (&key (x (error ":x required"))
                          (y (error ":y required"))
                          (num-rows 1)
@@ -119,11 +122,34 @@
            :for tile :in tiles :do
            (unless (find tile tile-types)
              (error (format nil "Unknown tile-type ~A. Must be one of ~A" tile tile-types)))
-           (push (make-instance 'rectangle
-                                :width tile-size :height tile-size
-                                :color (make-random-color)
-                                :x (+ x (* col tile-size))
-                                :y (+ y (* row tile-size)))
+           (push (case tile
+                   (:middle-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   ;; TODO: precisely measure out tiles and extend static-sprite to handle this case
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.15 #.17 25 25))))))
+                   (:nw-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.0 #.17 25 25))))))
+                   (:ne-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.56 #.17 25 25))))))
+                   (otherwise (make-instance 'rectangle
+                                             :width tile-size :height tile-size
+                                             :color (make-random-color)
+                                             :x (+ x (* col tile-size))
+                                             :y (+ y (* row tile-size)))))
                  tile-objects)
            (incf col 1)
            (when (= col num-cols)
@@ -195,11 +221,10 @@
                                   :height 66))
            (objects (list player
                           (make-tiles :x 300 :y (- demo-height 100)
-                                      :tiles '(:middle-leaf
-                                               :middle-leaf
-                                               :middle-leaf
-                                               :middle-leaf
-                                               :middle-leaf))
+                                      :num-rows 2
+                                      :num-cols 5
+                                      :tiles '(:nw-leaf :middle-leaf :middle-leaf :middle-leaf :ne-leaf
+                                               :middle-leaf :middle-leaf :middle-leaf :middle-leaf :middle-leaf))
                           ;; put an invisible box around world boundary
                           (make-instance 'aabb
                                          :x 0
