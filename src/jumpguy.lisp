@@ -99,8 +99,14 @@
              (setf (recurse.vert::color-mod rectangle) value))
 
   (let ((tile-types '(:middle-leaf
+                      :north-leaf
+                      :south-leaf
+                      :east-leaf
+                      :west-leaf
                       :nw-leaf
                       :ne-leaf
+                      :sw-leaf
+                      :se-leaf
                       :random-color-square)))
     (defun make-tiles (&key (x (error ":x required"))
                          (y (error ":y required"))
@@ -123,7 +129,7 @@
            (unless (find tile tile-types)
              (error (format nil "Unknown tile-type ~A. Must be one of ~A" tile tile-types)))
            (push (case tile
-                   (:middle-leaf
+                   (:north-leaf
                     (make-instance 'animated-sprite
                                    :width tile-size :height tile-size
                                    :x (+ x (* col tile-size))
@@ -131,6 +137,14 @@
                                    ;; TODO: precisely measure out tiles and extend static-sprite to handle this case
                                    :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
                                                                              :frames (vector (make-sprite-source #.15 #.17 25 25))))))
+                   (:middle-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   ;; TODO: precisely measure out tiles and extend static-sprite to handle this case
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.15 #.(+ 17 25) 25 25))))))
                    (:nw-leaf
                     (make-instance 'animated-sprite
                                    :width tile-size :height tile-size
@@ -138,6 +152,13 @@
                                    :y (+ y (* row tile-size))
                                    :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
                                                                              :frames (vector (make-sprite-source #.0 #.17 25 25))))))
+                   (:west-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.0 #.(+ 17 25) 25 25))))))
                    (:ne-leaf
                     (make-instance 'animated-sprite
                                    :width tile-size :height tile-size
@@ -145,6 +166,13 @@
                                    :y (+ y (* row tile-size))
                                    :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
                                                                              :frames (vector (make-sprite-source #.56 #.17 25 25))))))
+                   (:east-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.56 #.(+ 17 25) 25 25))))))
                    (otherwise (make-instance 'rectangle
                                              :width tile-size :height tile-size
                                              :color (make-random-color)
@@ -206,7 +234,8 @@
                                                             :width demo-width
                                                             :wrap-width 1024
                                                             :height demo-height)
-                                 :music (resource-path "music/james_song27_riff_with_layers.ogg")
+                                 ;; :music (resource-path "music/james_song27_riff_with_layers.ogg")
+                                 :music "/Users/andrew.kent/workspace/jumpguy/media/music/james_song14_happy_piano.ogg"
                                  :camera (make-instance 'camera
                                                         :pixels-per-unit 1
                                                         :zoom 1
@@ -223,8 +252,22 @@
                           (make-tiles :x 300 :y (- demo-height 100)
                                       :num-rows 2
                                       :num-cols 5
-                                      :tiles '(:nw-leaf :middle-leaf :middle-leaf :middle-leaf :ne-leaf
-                                               :middle-leaf :middle-leaf :middle-leaf :middle-leaf :middle-leaf))
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf))
+                          (make-tiles :x 700 :y (- demo-height 200)
+                                      :num-rows 4
+                                      :num-cols 5
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-tiles :x 1100 :y (- demo-height 310)
+                                      :num-rows 4
+                                      :num-cols 5
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
                           ;; put an invisible box around world boundary
                           (make-instance 'aabb
                                          :x 0
