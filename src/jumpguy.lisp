@@ -185,6 +185,29 @@
                    row (+ 1 row)))
            :finally (return tile-objects))))))
 
+(progn ; collectable
+  (defclass collectable (animated-sprite)
+    ((recurse.vert:animations
+      :initform (list :glow (make-animation :spritesheet (resource-path "others_artsets/glowing-orbs.png")
+                                            :frames (vector (make-sprite-source #.(- 380 25) #.(* 0 25) 30 30)
+                                                            ;; (make-sprite-source #.(- 380 25) #.(+ 63) 30 30)
+                                                            ;; (make-sprite-source #.(- 380 25) #.(+ 95) 30 30)
+                                                            (make-sprite-source #.(- 380 25) #.(+ 35) 30 30))
+                                            :time-between-frames-ms 300)))
+     (on-collect :initform nil :initarg :on-collect :documentation "function to run when this collectable is collected"))
+    (:documentation "A thing to collect"))
+
+  (defcollision ((player player) (collectable collectable))
+    (when (call-next-method player collectable)
+      (with-slots (on-collect) collectable
+        (when on-collect
+          (funcall on-collect collectable)))
+      (object-destroyed collectable))
+    ;; prevent collision resolution by returning nil
+    nil)
+
+  )
+
 (progn ; game scene
   (defclass my-scene-input-handler (input-handler)
     ())
@@ -215,7 +238,16 @@
     (:documentation "Default scene for my game"))
 
   (defmethod update :before ((scene myscene) delta-t-ms world-context)
-             (update (slot-value scene 'scene-input-handler) delta-t-ms scene)))
+             (update (slot-value scene 'scene-input-handler) delta-t-ms scene))
+
+  (defevent object-destroyed ((game-object game-object))
+      "An object has been destroyed and should be removed from the game scene.")
+
+  (defmethod add-to-scene :after ((scene myscene) (object game-object))
+             (add-subscriber object scene object-destroyed))
+
+  (defevent-callback object-destroyed ((game-object game-object) (scene myscene))
+    (remove-from-scene scene game-object)))
 
 (progn ; main
   (defvar *player* nil)
@@ -255,18 +287,34 @@
                                       :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
                                                :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf))
                           (make-tiles :x 700 :y (- demo-height 200)
-                                      :num-rows 4
+                                      :num-rows 5
                                       :num-cols 5
                                       :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
                                                :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
                                                :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
                                                :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-instance 'collectable :x 820 :y (- demo-height 300)
+                                         :width 20 :height 20
+                                         :on-collect (lambda (collectable)
+                                                       (declare (ignore collectable))
+                                                       (play-sound-effect
+                                                        (audio-player *engine-manager*)
+                                                        (resource-path "sfx/sonic-ring-collect.wav"))))
                           (make-tiles :x 1100 :y (- demo-height 310)
-                                      :num-rows 4
+                                      :num-rows 7
                                       :num-cols 5
                                       :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
                                                :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
                                                :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :west-leaf :middle-leaf :middle-leaf :middle-leaf :east-leaf
+                                               :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-tiles :x 1500 :y (- demo-height 310)
+                                      :num-rows 2
+                                      :num-cols 5
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
                                                :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
                           ;; put an invisible box around world boundary
                           (make-instance 'aabb
