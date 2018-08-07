@@ -81,7 +81,10 @@
            :jumping
            :falling))
       ((> (abs (velocity-x player)) 0.05) :running)
-      (T :standing))))
+      (T :standing)))
+
+  (defun collect (player collectable)
+    ))
 
 (progn ; tiles
   (defclass rectangle (static-sprite)
@@ -173,6 +176,27 @@
                                    :y (+ y (* row tile-size))
                                    :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
                                                                              :frames (vector (make-sprite-source #.56 #.(+ 17 25) 25 25))))))
+                   (:sw-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.0 #.(+ 17 50) 25 25))))))
+                   (:south-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.(+ 25) #.(+ 17 50) 25 25))))))
+                   (:se-leaf
+                    (make-instance 'animated-sprite
+                                   :width tile-size :height tile-size
+                                   :x (+ x (* col tile-size))
+                                   :y (+ y (* row tile-size))
+                                   :animations (list :static (make-animation :spritesheet (resource-path "others_artsets/jungle_asset_pack/jungle_tileset/jungle_tileset.png")
+                                                                             :frames (vector (make-sprite-source #.56 #.(+ 17 50) 25 25))))))
                    (otherwise (make-instance 'rectangle
                                              :width tile-size :height tile-size
                                              :color (make-random-color)
@@ -204,9 +228,7 @@
           (funcall on-collect collectable)))
       (object-destroyed collectable))
     ;; prevent collision resolution by returning nil
-    nil)
-
-  )
+    nil))
 
 (progn ; game scene
   (defclass my-scene-input-handler (input-handler)
@@ -256,7 +278,7 @@
     (let* ((demo-width #.(* 10 1024))
            (demo-height 768)
            (world (make-instance 'myscene
-                                 :width demo-width :height demo-height
+                                 :width demo-width :height (+ demo-height 100)
                                  :background (make-instance 'scene-background
                                                             :layers (list (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-1.png") :parallax-x 0.5 :parallax-y 0.01
                                                                           (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-2.png") :parallax-x 0.5 :parallax-y 0.01
@@ -267,7 +289,7 @@
                                                             :wrap-width 1024
                                                             :height demo-height)
                                  ;; :music (resource-path "music/james_song27_riff_with_layers.ogg")
-                                 :music "/Users/andrew.kent/workspace/jumpguy/media/music/james_song14_happy_piano.ogg"
+                                 :music "/Users/andrew.kent/workspace/jumpguy/media/music/james_song24_happy_part2.ogg"
                                  :camera (make-instance 'camera
                                                         :pixels-per-unit 1
                                                         :zoom 1
@@ -328,15 +350,20 @@
                                          :width demo-width
                                          :height 1)
                           (make-instance 'aabb
-                                         :x demo-width
-                                         :y 0
-                                         :height demo-height
-                                         :width 1)
-                          (make-instance 'aabb
                                          :x 0
                                          :y demo-height
                                          :height 1
-                                         :width demo-width))))
+                                         :width 800)
+                          (make-instance 'aabb ; invisible platform under world
+                                         :x 0
+                                         :y (+ demo-height 100)
+                                         :height 1
+                                         :width demo-width)
+                          (make-instance 'aabb
+                                         :x demo-width
+                                         :y 0
+                                         :height demo-height
+                                         :width 1))))
       (setf (clear-color *engine-manager*)
             *green*)
       (labels ((add-obj (object)
