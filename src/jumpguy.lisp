@@ -288,8 +288,7 @@
                                                             :width demo-width
                                                             :wrap-width 1024
                                                             :height demo-height)
-                                 ;; :music (resource-path "music/james_song27_riff_with_layers.ogg")
-                                 :music "/Users/andrew.kent/workspace/jumpguy/media/music/james_song24_happy_part2.ogg"
+                                 :music (resource-path "music/james_song27_riff_with_layers.ogg")
                                  :camera (make-instance 'camera
                                                         :pixels-per-unit 1
                                                         :zoom 1
