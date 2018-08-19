@@ -9,6 +9,25 @@
                 ("Quit" (run-action (quit))))))
     menu))
 
+
+(defun game-over-menu ()
+  (setf (clear-color *engine-manager*) *red*)
+  (let ((menu (create-menu (menu :active-input-device *all-input-id*)
+                "GAME OVER"
+                ("Try Again" (run-action
+                              (change-scene *engine-manager* (launch-jumpguy))))
+                ("Give Up" (run-action (quit))))))
+    menu))
+
+(defun won-game-menu ()
+  (setf (clear-color *engine-manager*) *black*)
+  (let ((menu (create-menu (menu :active-input-device *all-input-id*)
+                "A WINNER IS YOU!"
+                ("Quit" (run-action (quit)))
+                ("Play Again" (run-action
+                               (change-scene *engine-manager* (launch-jumpguy)))))))
+    menu))
+
 (progn ; player
   (defclass player (jumper animated-sprite input-handler direction-tracker)
     ((recurse.vert:animations ; TODO: class allocate? :allocation :class
@@ -230,6 +249,30 @@
     ;; prevent collision resolution by returning nil
     nil))
 
+(progn
+  (defclass warp-zone (aabb)
+    ((on-warp :initform nil :initarg :on-warp))
+    (:documentation "An object which changes the scene when touched by the player"))
+
+  (defclass win-zone (warp-zone animated-sprite)
+    ((activated :initform nil)
+     (recurse.vert:animations
+      :initform (list :glow (make-animation :spritesheet (resource-path "others_artsets/glowing-orbs.png")
+                                            :frames (vector (make-sprite-source #.(- 380 25) #.(* 0 25) 30 30)
+                                                            (make-sprite-source #.(- 380 25) #.(+ 35) 30 30))
+                                            :time-between-frames-ms 300)))))
+
+  (defun activate (win-zone)
+    (setf (slot-value win-zone 'activated) T)
+    (setf (recurse.vert::color-mod win-zone) nil))
+
+  (defcollision ((player player) (warp-zone warp-zone))
+    (when (call-next-method player warp-zone)
+      (with-slots (on-warp) warp-zone
+        (when on-warp (funcall on-warp))))
+    ;; prevent collision resolution by returning nil
+    nil))
+
 (progn ; game scene
   (defclass my-scene-input-handler (input-handler)
     ())
@@ -301,7 +344,16 @@
                                   :y (/ demo-height 2)
                                   :width 42
                                   :height 66))
+
+           (collectable-count 0)
+           (win-zone (make-instance 'win-zone :x 3000 :y (- demo-height 450)
+                                    :color-mod *red*
+                                    :width 50 :height 50
+                                    :on-warp (lambda ()
+                                               (unless (< collectable-count 2)
+                                                 (change-scene *engine-manager* (won-game-menu))))))
            (objects (list player
+                          win-zone
                           (make-tiles :x 300 :y (- demo-height 100)
                                       :num-rows 2
                                       :num-cols 5
@@ -319,6 +371,9 @@
                                          :width 20 :height 20
                                          :on-collect (lambda (collectable)
                                                        (declare (ignore collectable))
+                                                       (incf collectable-count)
+                                                       (when (> collectable-count 1)
+                                                         (activate win-zone))
                                                        (play-sound-effect
                                                         (audio-player *engine-manager*)
                                                         (resource-path "sfx/sonic-ring-collect.wav"))))
@@ -337,6 +392,33 @@
                                       :num-cols 5
                                       :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
                                                :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-instance 'collectable :x 1820 :y (- demo-height 450)
+                                         :width 20 :height 20
+                                         :on-collect (lambda (collectable)
+                                                       (declare (ignore collectable))
+                                                       (incf collectable-count)
+                                                       (when (> collectable-count 1)
+                                                         (activate win-zone))
+                                                       (play-sound-effect
+                                                        (audio-player *engine-manager*)
+                                                        (resource-path "sfx/sonic-ring-collect.wav"))))
+                          (make-tiles :x 1900 :y (- demo-height 310)
+                                      :num-rows 2
+                                      :num-cols 5
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-tiles :x 2300 :y (- demo-height 350)
+                                      :num-rows 2
+                                      :num-cols 15
+                                      :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
+                                               :sw-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-instance 'warp-zone ; die if you fall below the world
+                                         :x 0
+                                         :y (+ demo-height 5)
+                                         :height 1
+                                         :width demo-width
+                                         :on-warp (lambda ()
+                                                    (change-scene *engine-manager* (game-over-menu))))
                           ;; put an invisible box around world boundary
                           (make-instance 'aabb
                                          :x 0
@@ -368,7 +450,7 @@
       (labels ((add-obj (object)
                  (if (listp object)
                      (loop :for sub-object :in object :do
-                        (add-obj sub-object))
+                          (add-obj sub-object))
                      (add-to-scene world object))))
         (loop for object in objects do
              (add-obj object)))
