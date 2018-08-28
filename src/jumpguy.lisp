@@ -249,7 +249,7 @@
     ;; prevent collision resolution by returning nil
     nil))
 
-(progn
+(progn ; warp zones
   (defclass warp-zone (aabb)
     ((on-warp :initform nil :initarg :on-warp))
     (:documentation "An object which changes the scene when touched by the player"))
@@ -376,7 +376,7 @@
                                                          (activate win-zone))
                                                        (play-sound-effect
                                                         (audio-player *engine-manager*)
-                                                        (resource-path "sfx/sonic-ring-collect.wav"))))
+                                                        (resource-path "sfx/orb-collect.wav"))))
                           (make-tiles :x 1100 :y (- demo-height 310)
                                       :num-rows 7
                                       :num-cols 5
@@ -401,7 +401,7 @@
                                                          (activate win-zone))
                                                        (play-sound-effect
                                                         (audio-player *engine-manager*)
-                                                        (resource-path "sfx/sonic-ring-collect.wav"))))
+                                                        (resource-path "sfx/orb-collect.wav"))))
                           (make-tiles :x 1900 :y (- demo-height 310)
                                       :num-rows 2
                                       :num-cols 5
