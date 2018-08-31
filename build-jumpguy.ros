@@ -1,0 +1,56 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#| Jumpguy Game Launcher
+exec ros -Q -- $0 "$@"
+|#
+(progn ;;init forms
+  (ql:quickload :jumpguy :silent T))
+
+(defpackage :ros.script.vert.3680061375
+  (:use :cl))
+(in-package :ros.script.vert.3680061375)
+
+(defun git-id ()
+  "Return a string describing the current git-tag or commit sha if not on a tag."
+  (delete #\newline
+          (with-output-to-string (cmd-stream)
+            (or (uiop:run-program "git describe --tags --abbrev=0"
+                                  :ignore-error-status T
+                                  :output cmd-stream)
+                (uiop:run-program "git rev-parse --short HEAD" :output cmd-stream)))))
+
+(defparameter *build-version* (git-id)
+  "version control id which created this build")
+
+(defun main (&rest argv)
+  (if argv
+      (let ((game-str (string-upcase (first argv)))
+            (game-name (second argv))
+            (dev-mode (string-upcase (third argv)))
+            (game-package *package*)
+            (game-fn nil))
+        (when game-str
+          (when (> (count #\: game-str) 0)
+            (setf game-package
+                  (find-package
+                   (subseq game-str 0 (position #\: game-str))))
+            (setf game-str (subseq game-str (+ 1 (position #\: game-str)))))
+          (when (and game-package (find-symbol game-str game-package))
+            (setf game-fn (symbol-function (find-symbol game-str game-package)))))
+        (if game-fn
+            (progn
+              (format T "running build ~A~%" *build-version*)
+              (recurse.vert:main game-fn
+                                 :game-name game-name
+                                 :block T
+                                 :dev-mode dev-mode)
+              0)
+            (progn
+              (format T "Error: No game function found. Given ~A" argv)
+              1)))
+      ;; run game menu if no args given
+      (recurse.vert:main #'jumpguy::game-menu
+                         :game-name "Jump Guy"
+                         :dev-mode nil
+                         :block T)))
+;;; vim: set ft=lisp lisp:

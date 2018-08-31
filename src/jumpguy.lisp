@@ -323,11 +323,11 @@
            (world (make-instance 'myscene
                                  :width demo-width :height (+ demo-height 100)
                                  :background (make-instance 'scene-background
-                                                            :layers (list (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-1.png") :parallax-x 0.5 :parallax-y 0.01
-                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-2.png") :parallax-x 0.5 :parallax-y 0.01
-                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-3.png") :parallax-x 0.5 :parallax-y 0.01
-                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-4.png") :parallax-x 0.5 :parallax-y 0.01
-                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax background/plx-5.png") :parallax-x 0.5 :parallax-y 0.01)
+                                                            :layers (list (resource-path "others_artsets/jungle_asset_pack/parallax-background/plx-1.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax-background/plx-2.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax-background/plx-3.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax-background/plx-4.png") :parallax-x 0.5 :parallax-y 0.01
+                                                                          (resource-path "others_artsets/jungle_asset_pack/parallax-background/plx-5.png") :parallax-x 0.5 :parallax-y 0.01)
                                                             :width demo-width
                                                             :wrap-width 1024
                                                             :height demo-height)
