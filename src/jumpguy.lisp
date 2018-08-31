@@ -352,6 +352,7 @@
                                     :on-warp (lambda ()
                                                (unless (< collectable-count 2)
                                                  (change-scene *engine-manager* (won-game-menu))))))
+           (num-orbs-to-collect 3)
            (objects (list player
                           win-zone
                           (make-tiles :x 300 :y (- demo-height 100)
@@ -372,7 +373,7 @@
                                          :on-collect (lambda (collectable)
                                                        (declare (ignore collectable))
                                                        (incf collectable-count)
-                                                       (when (> collectable-count 1)
+                                                       (when (>= collectable-count num-orbs-to-collect)
                                                          (activate win-zone))
                                                        (play-sound-effect
                                                         (audio-player *engine-manager*)
@@ -397,7 +398,7 @@
                                          :on-collect (lambda (collectable)
                                                        (declare (ignore collectable))
                                                        (incf collectable-count)
-                                                       (when (> collectable-count 1)
+                                                       (when (>= collectable-count num-orbs-to-collect)
                                                          (activate win-zone))
                                                        (play-sound-effect
                                                         (audio-player *engine-manager*)
@@ -407,6 +408,16 @@
                                       :num-cols 5
                                       :tiles '(:nw-leaf :north-leaf :north-leaf :north-leaf :ne-leaf
                                                :sw-leaf :south-leaf :south-leaf :south-leaf :se-leaf))
+                          (make-instance 'collectable :x 2500 :y (- demo-height 500)
+                                         :width 20 :height 20
+                                         :on-collect (lambda (collectable)
+                                                       (declare (ignore collectable))
+                                                       (incf collectable-count)
+                                                       (when (>= collectable-count num-orbs-to-collect)
+                                                         (activate win-zone))
+                                                       (play-sound-effect
+                                                        (audio-player *engine-manager*)
+                                                        (resource-path "sfx/orb-collect.wav"))))
                           (make-tiles :x 2300 :y (- demo-height 350)
                                       :num-rows 2
                                       :num-cols 15
