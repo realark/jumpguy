@@ -331,7 +331,7 @@
                                                             :width demo-width
                                                             :wrap-width 1024
                                                             :height demo-height)
-                                 :music (resource-path "music/james_song27_riff_with_layers.ogg")
+                                 :music (resource-path "music/james_song14_happy_piano.ogg")
                                  :camera (make-instance 'camera
                                                         :pixels-per-unit 1
                                                         :zoom 1
@@ -346,13 +346,13 @@
                                   :height 66))
 
            (collectable-count 0)
+           (num-orbs-to-collect 3)
            (win-zone (make-instance 'win-zone :x 3000 :y (- demo-height 450)
                                     :color-mod *red*
                                     :width 50 :height 50
                                     :on-warp (lambda ()
-                                               (unless (< collectable-count 2)
+                                               (unless (< collectable-count num-orbs-to-collect)
                                                  (change-scene *engine-manager* (won-game-menu))))))
-           (num-orbs-to-collect 3)
            (objects (list player
                           win-zone
                           (make-tiles :x 300 :y (- demo-height 100)
