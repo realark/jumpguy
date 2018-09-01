@@ -20,6 +20,8 @@ endif
 
 .PHONY: clean build-dirs
 
+zip: build build-resources
+	cd build/ && zip -r jumpguy-`git describe --tags --abbrev=0 || git rev-parse --short HEAD`.zip jumpguy
 bundle: prep-release build/vert
 	git describe --tags --abbrev=0 || git rev-parse --short HEAD # stop if not in git
 	cd build && zip -r vert-`git describe --tags --abbrev=0 || git rev-parse --short HEAD`.zip vert
